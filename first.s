@@ -3,22 +3,49 @@
 
 main:
 	push 	{lr}
-	ldr 	r0, =code
-	ldr 	r1, =clear
+
+@Получаем ширину и высоту консоли
+	ldr 	r0, =export
+	bl 		system
+
+	ldr 	r0, =rows
+	bl 		getenv
+	bl 		atoi
+	ldr 	r1, =height
+	str 	r0, [r1]
+
+	ldr 	r0, =cols
+	bl 		getenv
+	bl 		atoi
+	ldr 	r1, =width
+	str 	r0, [r1]
+
+@Чистим экран, ставим крусор
+	ldr 	r0, =clear
 	bl 		printf
-	ldr 	r0, =code
-	ldr 	r1, =set0up
+	ldr 	r0, =up
+	ldr 	r1, =height
+	ldr 	r1, [r1]
 	bl 		printf
-	ldr 	r0, =code
-	ldr		r1, =set0left
+	ldr 	r0, =left
+	ldr		r1, =width
+	ldr 	r1, [r1]
 	bl 		printf
-	ldr 	r0, =code
-	ldr 	r1, =moveDown
+	ldr 	r0, =down
+	ldr 	r1, =height
+	ldr 	r1, [r1]
+	mov 	r2, #2
+	udiv 	r1, r1, r2
 	bl 		printf
-	ldr 	r0, =code
-	ldr 	r1, =moveRight
+	ldr 	r0, =right
+	ldr 	r1, =width
+	ldr 	r1, [r1]
+	mov 	r2, #2
+	udiv 	r1, r1, r2
+	subs 	r1, r1, #6
 	bl 		printf
 
+@Считаем факториал
 	mov 	r1, #1
 	mov 	r2, #12
 
@@ -31,6 +58,7 @@ factorial:
 	ldr 	r0, =color
 	bl 		printf
 	pop 	{r1}
+
 @Получение троек факториала в стэке
 	mov 	r2, #1000   @Делитель (система счисления у нас 10)
 	mov 	r4, #0    @счётчик
@@ -64,11 +92,13 @@ done:
 	bl 		printf
 	ldr 	r0, =normal
 	bl 		printf
-	ldr 	r0, =code
-	ldr 	r1, =moveDown
+	ldr 	r0, =down
+	ldr 	r1, =height
+	ldr 	r1, [r1]
 	bl 		printf
-	ldr 	r0, =code
-	ldr 	r1, =set0left
+	ldr 	r0, =left
+	ldr 	r1, =width
+	ldr 	r1, [r1]
 	bl 		printf
 
 wait_enter:
@@ -76,18 +106,30 @@ wait_enter:
 	cmp 	r0, #10
 	bne 	wait_enter
 
-	ldr 	r0, =code
-	ldr 	r1, =clear
+	ldr 	r0, =clear
 	bl 		printf
-	ldr 	r0, =code
-	ldr 	r1, =set0up
+	ldr 	r0, =up
+	ldr 	r1, =height
+	ldr 	r1, [r1]
 	bl 		printf
-	ldr 	r0, =code
-	ldr 	r1, =set0left
+	ldr 	r0, =left
+	ldr 	r1, =width
+	ldr 	r1, [r1]
 	bl 		printf
+	mov 	r0, #0
 	pop 	{pc}
 
 .data
+export:
+	.ascii "export LINES; export COLUMNS;\0"
+rows:
+	.ascii "LINES\0"
+cols:
+	.ascii "COLUMNS\0"
+width:
+	.int 	0
+height:
+	.int 	0
 space:
 	.ascii "\ \0"
 color:
@@ -98,15 +140,15 @@ firstDigit:
 	.ascii "\ %d\0"
 digit:
 	.ascii "\ %03d\0"
-code:
-	.ascii "\033[%s\0"
 clear:
-	.ascii "2J\0"
-set0left:
-	.ascii "80D\0"
-set0up:
-	.ascii "25A\0"
-moveDown:
-	.ascii "12B\0"
-moveRight:
-	.ascii "34C\0"
+	.ascii "\033[2J\0"
+left:
+	.ascii "\033[%dD\0"
+up:
+	.ascii "\033[%dA\0"
+down:
+	.ascii "\033[%dB\0"
+right:
+	.ascii "\033[%dC\0"
+debug_msg:
+	.ascii "LIVE!!!\0"
