@@ -1,0 +1,8 @@
+gcc-arm-linux-gnueabihf-4.7
+gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf
+*.c
+*.o
+*.out
+*.elf
+*.sh
+*.pdf
